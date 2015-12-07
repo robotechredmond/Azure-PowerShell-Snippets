@@ -13,6 +13,64 @@ $subscriptionId =
 Select-AzureRmSubscription `
     -SubscriptionId $subscriptionId
 
+# Select Azure Resource Group in which existing VNET is provisioned
+
+$rgName =
+    (Get-AzureRmResourceGroup |
+     Out-GridView `
+        -Title "Select an Azure Resource Group ..." `
+        -PassThru).ResourceGroupName
+
+# Select Azure VNET on which to enable a user-defined route
+
+$vnetName = 
+    (Get-AzureRmVirtualNetwork `
+        -ResourceGroupName $rgName).Name |
+     Out-GridView `
+        -Title "Select an Azure VNET ..." `
+        -PassThru
+
+$vnet = Get-AzureRmVirtualNetwork `
+    -ResourceGroupName $rgName `
+    -Name $vnetName
+
+$location = $vnet.Location
+
+# Select Azure Subnet on which to enable a user-defined route
+
+$subnetName = 
+    $vnet.Subnets.Name |
+    Out-GridView `
+        -Title "Select an Azure Subnet ..." `
+        -PassThru
+
+$subnet = $vnet.Subnets | 
+    Where-Object Name -eq $subnetName
+
+# Assign Virtual Machine Contributor Role to a Subnet
+
+$roleName = "Virtual Machine Contributor"
+
+$adGroupName = "Demo Test"
+
+$adGroup = Get-AzureRMADGroup -SearchString $adGroupName
+
+$roleAssignment = New-AzureRmRoleAssignment `
+    -ObjectId $adGroup.Id `
+    -RoleDefinitionName $roleName `
+    -Scope $subnet.Id
+
+# Display Role Assignments
+
+Get-AzureRmRoleAssignment
+
+# Remove Role Assignments
+
+Remove-AzureRmRoleAssignment `
+    -ObjectId $roleAssignment.ObjectId `
+    -RoleDefinitionName $roleName `
+    -Scope $subnet.Id
+
 # Select actions to allow in new custom role
 
 $actions = Get-AzureRmProviderOperation `
@@ -51,4 +109,26 @@ ForEach ($action in $actions) {
 
 # Create new custom role based on defined role object
 
-New-AzureRmRoleDefinition -Role $roleDef
+New-AzureRmRoleDefinition `
+    -Role $roleDef
+
+# Remove custom role
+
+$role = Get-AzureRmRoleDefinition `
+    -Name $roleName
+
+Remove-AzureRmRoleDefinition `
+    -Id $role.Id
+
+# Review Access Change History Report
+
+Get-AzureRmAuthorizationChangeLog `
+    -StartTime ([DateTime]::Now - [TimeSpan]::FromDays(7)) |
+    Format-Table `
+        Caller,
+        Action,
+        RoleName,
+        PrincipalType,
+        PrincipalName,
+        ScopeType,
+        ScopeName
