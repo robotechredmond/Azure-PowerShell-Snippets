@@ -1,8 +1,8 @@
-﻿# Sign-in to Azure via Azure Resource Manager
+﻿# STEP 1: Sign-in to Azure via Azure Resource Manager
 
 Login-AzureRmAccount
 
-# Select Azure Subscription
+# STEP 2: Select Azure Subscription
 
 $subscriptionId = 
     ( Get-AzureRmSubscription |
@@ -14,7 +14,7 @@ $subscriptionId =
 Select-AzureRmSubscription `
     -SubscriptionId $subscriptionId
 
-# If needed, register ARM core resource providers
+# STEP 3: If needed, register ARM core resource providers
 
 Register-AzureRmResourceProvider `
     -ProviderNamespace Microsoft.Compute
@@ -30,7 +30,7 @@ Get-AzureRmResourceProvider |
     -Property ProviderNamespace `
     -ExpandProperty ResourceTypes
 
-# Select Azure Resource Group in which existing VNET is provisioned
+# STEP 4: Select Azure Resource Group in which existing VNET is provisioned
 
 $rgName =
     ( Get-AzureRmResourceGroup |
@@ -39,7 +39,7 @@ $rgName =
           -PassThru
     ).ResourceGroupName
 
-# Select Azure VNET gateway on which to start diagnostics logging
+# STEP 5: Select Azure VNET gateway on which to start diagnostics logging
 
 $vnetGwName = 
     ( Get-AzureRmVirtualNetworkGateway `
@@ -49,7 +49,7 @@ $vnetGwName =
         -Title "Select an Azure VNET Gateway ..." `
         -PassThru
 
-# Select Azure Storage Account on which to send logs
+# STEP 6: Select Azure Storage Account on which to send logs
 
 $storageAccountName = 
     ( Get-AzureRmStorageAccount `
@@ -59,7 +59,7 @@ $storageAccountName =
         -Title "Select an Azure Storage Account ..." `
         -PassThru
 
-# Get Key for Azure Storage Account
+# STEP 7: Get Key for Azure Storage Account
 
 $storageAccountKey = 
     ( Get-AzureRmStorageAccountKey `
@@ -67,23 +67,23 @@ $storageAccountKey =
           -ResourceGroupName $rgName
     ).Key1
 
-# Sign-in to Azure via Azure Service Management
+# STEP 8: Sign-in to Azure via Azure Service Management
 
 Add-AzureAccount
 
-# Select same Azure subscription via Azure Service Management
+# STEP 9: Select same Azure subscription via Azure Service Management
 
 Select-AzureSubscription `
     -SubscriptionId $subscriptionId
 
-# Set Storage Context for storing logs
+# STEP 10: Set Storage Context for storing logs
 
 $storageContext = 
     New-AzureStorageContext `
         -StorageAccountName $storageAccountName `
         -StorageAccountKey $storageAccountKey
 
-# Get Gateway ID for VNET Gateway
+# STEP 11: Get Gateway ID for VNET Gateway
 
 $vnetGws = Get-AzureVirtualNetworkGateway 
 
@@ -92,7 +92,7 @@ $vnetGwId =
         ? GatewayName -eq $vnetGwName 
     ).GatewayId
 
-# Start Azure VNET Gateway logging
+# STEP 12: Start Azure VNET Gateway logging
 
 $captureDuration = 60
 
@@ -104,17 +104,17 @@ Start-AzureVirtualNetworkGatewayDiagnostics  `
     -StorageContext $storageContext `
     -ContainerName $storageContainer
 
-# Test VNET gateway connection to another server across the tunnel 
+# STEP 13: Test VNET gateway connection to another server across the tunnel 
  
 Test-NetConnection `
     -ComputerName 10.0.0.4 `
     -CommonTCPPort RDP
 
-# Wait for diagnostics capturing to complete
+# STEP 14: Wait for diagnostics capturing to complete
  
 Sleep -Seconds $captureDuration
 
-# Download VNET gateway diagnostics log
+# STEP 15: Download VNET gateway diagnostics log
 
 $logUrl = 
     ( Get-AzureVirtualNetworkGatewayDiagnostics `
