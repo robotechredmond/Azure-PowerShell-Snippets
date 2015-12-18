@@ -13,6 +13,23 @@ $subscriptionId =
 Select-AzureRmSubscription `
     -SubscriptionId $subscriptionId
 
+# Assign Reader to subscription
+
+$roleName = "Reader"
+
+$adGroupName = "Demo Test"
+
+$adGroup = Get-AzureRMADGroup -SearchString $adGroupName
+
+$scope = "/subscriptions/$subscriptionId"
+
+$roleAssignment = New-AzureRmRoleAssignment `
+    -ObjectId $adGroup.Id `
+    -RoleDefinitionName $roleName `
+    -Scope $scope
+
+Get-AzureRmRoleAssignment
+
 # Select Azure Resource Group in which existing VNET is provisioned
 
 $rgName =
