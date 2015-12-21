@@ -1,26 +1,26 @@
 ﻿# Sign-in with Azure account credentials
 
-Login-AzureRmAccount
+    Login-AzureRmAccount
 
 # Select Azure Subscription
 
-$subscriptionId = 
-    (Get-AzureRmSubscription |
-     Out-GridView `
-        -Title "Select an Azure Subscription ..." `
-        -PassThru).SubscriptionId
+    $subscriptionId = 
+        (Get-AzureRmSubscription |
+         Out-GridView `
+            -Title "Select an Azure Subscription ..." `
+            -PassThru).SubscriptionId
 
 
-Select-AzureRmSubscription `
-    -SubscriptionId $subscriptionId
+    Select-AzureRmSubscription `
+        -SubscriptionId $subscriptionId
 
 # Select Azure Resource Group 
 
-$rgName =
-    (Get-AzureRmResourceGroup |
-     Out-GridView `
-        -Title "Select an Azure Resource Group ..." `
-        -PassThru).ResourceGroupName
+    $rgName =
+        (Get-AzureRmResourceGroup |
+         Out-GridView `
+            -Title "Select an Azure Resource Group ..." `
+            -PassThru).ResourceGroupName
 
 # Download currently list of Azure Public IP addresses
 # See this link for latest list: https://www.microsoft.com/en-in/download/confirmation.aspx?id=41653
