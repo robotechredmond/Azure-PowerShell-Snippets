@@ -32,7 +32,7 @@ Get-AzureRmResourceProvider |
 # Set Azure Datacenter Region Location
 
 $location = 
-    "East US"
+    "West US"
 
 # Select VM Image Publisher
 
@@ -55,5 +55,13 @@ $vmImageSku =
 # Set VM Image Version
 
 $vmImageVersion = "latest"
+
+# Get Azure VM Image information
+
+$vmImage = Get-AzureRmVmImage -Location $location -PublisherName $vmImagePublisher -Offer $vmImageOffer -Skus $vmImageSku 
+
+$vmImage
+
+$vmImage.Id
 
 
