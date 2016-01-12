@@ -103,3 +103,38 @@
             -ResourceGroupName $rgName `
             -Location $location `
             -SecurityRules $rules
+
+# Associate NSG to a VNET subnet
+
+    # Select VNET
+
+        $vnetName = 
+            (Get-AzureRmVirtualNetwork `
+                -ResourceGroupName $rgName).Name |
+             Out-GridView `
+                -Title "Select an Azure VNET ..." `
+                -PassThru
+
+        $vnet = Get-AzureRmVirtualNetwork `
+            -ResourceGroupName $rgName `
+            -Name $vnetName
+
+    # Select Subnet 
+
+        $subnetName = 
+            $vnet.Subnets.Name |
+            Out-GridView `
+                -Title "Select an Azure Subnet ..." `
+                -PassThru
+
+        $subnet = $vnet.Subnets | 
+            Where-Object Name -eq $subnetName
+
+    # Associate NSG to selected Subnet
+
+        Set-AzureRmVirtualNetworkSubnetConfig `
+            -VirtualNetwork $vnet `
+            -Name $subnetName `
+            -AddressPrefix $subnet.AddressPrefix `
+            -NetworkSecurityGroup $nsg |
+        Set-AzureRmVirtualNetwork
