@@ -81,7 +81,7 @@
 
     $asRef.ReferenceUri = $as.Id
 
-    $vm.AvailabilitySetReference = $asRef
+    $vm.AvailabilitySetReference = $asRef # To remove VM from Availability Set, set to $null
 
 # Clean-up VM config to reflect deployment from attached disks
 
