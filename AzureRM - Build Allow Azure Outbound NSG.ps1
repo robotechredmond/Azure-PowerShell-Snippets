@@ -25,9 +25,13 @@
 # Download current list of Azure Public IP addresses
 # See this link for latest list: https://www.microsoft.com/en-in/download/confirmation.aspx?id=41653
 
-    $uri = "https://download.microsoft.com/download/0/1/8/018E208D-54F8-44CD-AA26-CD7BC9524A8C/PublicIPs_20151214.xml"
+    $downloadUri = "https://www.microsoft.com/en-in/download/confirmation.aspx?id=41653"
 
-    $response = Invoke-WebRequest -Uri $uri
+    $downloadPage = Invoke-WebRequest -Uri $downloadUri
+
+    $xmlFileUri = ($downloadPage.RawContent.Split('"') -like "https://*PublicIps*")[0]
+
+    $response = Invoke-WebRequest -Uri $xmlFileUri
 
 # Get list of Regions and corresponding public IP address ranges
 
@@ -45,7 +49,7 @@
 
     $ipRange = ( $regions | where-object Name -In $selectedRegions ).IpRange
 
-# Build Network Security Group
+# Build Network Security Group rules
 
     $rules = @()
 
