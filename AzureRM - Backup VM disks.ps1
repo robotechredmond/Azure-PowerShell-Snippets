@@ -130,7 +130,7 @@ ForEach ($vmDisk in $vmDisks) {
 
 }
 
-# Start VM if it was previously not allocated
+# Start VM if it was previously not de-allocated
 
 if ($vmStatus[-1].Code -ne "PowerState/deallocated") {
     $vm | Start-AzureRmVm 
