@@ -78,7 +78,7 @@ Foreach ($vmDisk in $vm.StorageProfile.DataDisks) {
 
 }
 
-# Create "backups" container in Storage Account
+# Define Context for Storage Account
 
 $storageAccountName = 
     $vmDisks[0].Substring(8).Split('.')[0]
@@ -88,7 +88,11 @@ $storageContext =
         -ResourceGroupName $rgName `
         -Name $storageAccountName).Context
 
-$destContainer = "backups"
+# Create "backups" container in Storage Account
+
+$destContainer = 
+    "backups-" + 
+    (Get-Date -Format o).Replace(":","-").Replace(".","-").ToLower()
 
 New-AzureStorageContainer `
     -Name $destContainer `
