@@ -216,3 +216,30 @@ Set-AzureRmVMDiskEncryptionExtension `
  Get-AzureRmVMDiskEncryptionStatus `
     -ResourceGroupName $rgName `
     -VMName $vmName
+
+# Enable Logging for Key Vault
+
+$saName = $vaultName.ToLower() + "logs"
+
+$sa = 
+    New-AzureRmStorageAccount `
+        -ResourceGroupName $rgName `
+        -Name $saName `
+        -Type Standard_LRS `
+        -Location $rg.Location
+
+Set-AzureRmDiagnosticSetting `
+    -ResourceId $vault.ResourceId `
+    -StorageAccountId $sa.Id `
+    -Enabled $true `
+    -Categories AuditEvent
+
+$container =
+    'insights-logs-auditevent'
+
+$logs = 
+    Get-AzureStorageBlob `
+        -Container $container `
+        -Context $sa.Context
+
+$logs | Get-AzureStorageBlobContent -Destination '.' -Force
