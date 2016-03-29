@@ -20,7 +20,7 @@ $pfxPassword = Read-Host -Prompt "Enter password to protect exported certificate
 
 $pfxFilepath = Read-Host -Prompt "Enter full path to export certificate (ex C:\folder\filename.pfx)" 
 
-Export-PfxCertificate -Cert "$($certStore)\$($certThumbprint)" -FilePath $pfxFilepath -Password $password
+Export-PfxCertificate -Cert "$($certStore)\$($certThumbprint)" -FilePath $pfxFilepath -Password $pfxPassword
 
 # Login to Azure Account
 
