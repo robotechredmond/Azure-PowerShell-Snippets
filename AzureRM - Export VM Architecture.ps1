@@ -57,6 +57,7 @@
         $vmStorageAccountFqdn = $_.StorageProfile.OSDisk.VirtualHardDisk[0].Uri.Split('/')[2]
         $vmStorageAccountHost = (Resolve-DnsName $vmStorageAccountFqdn).NameHost.Split('.')[1]
 
+        Write-Output "$rgName,$vmName,$vmLocation,$vmSize,$asName,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" >>export.csv
     
     }
 
