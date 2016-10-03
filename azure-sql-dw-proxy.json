@@ -1,0 +1,145 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+
+  "parameters": {
+
+    "namePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Naming prefix for each new resource created. 8-char max, lowercase alphanumeric"
+      }
+    },
+
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Administrator of the Azure SQL Server instance"
+      }
+    },
+
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Administrator account of the Azure SQL Server instance"
+      }
+    },
+
+    "collation": {
+      "type": "string",
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+      "metadata": {
+        "description": "Collation type for SQL database"
+      }
+    },
+
+    "maxSizeBytes": {
+      "type": "string",
+      "defaultValue": "10995116277760",
+      "metadata": {
+        "description": "Maximum database size in bytes"
+      }
+    },
+
+    "performanceDwu": {
+      "type": "string",
+      "defaultValue": "DW400",
+      "allowedValues": [
+        "DW100",
+        "DW200",
+        "DW300",
+        "DW400",
+        "DW500",
+        "DW600",
+        "DW1000",
+        "DW1200",
+        "DW1500",
+        "DW2000",
+        "DW3000",
+        "DW6000"
+      ],
+      "metadata": {
+        "description": "Performance tier of database in DWU"
+      }
+    }
+
+  },
+
+  "variables": {
+
+    "apiVersion": "2014-04-01",
+    "apiVersionDw": "2014-04-01-preview",
+
+    "sqlServerName": "[concat(parameters('namePrefix'),'srv')]",
+    "sqlDbName": "[concat(parameters('namePrefix'),'db')]",
+    "sqlFwRuleName": "AllowAllAzureIPs",
+    "sqlConnPolName": "Default",
+    "sqlEdition": "DataWarehouse"
+
+  },
+
+  "resources": [
+
+    {
+      "name": "[variables('sqlServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+      ],
+      "properties": {
+        "version": "12.0",
+        "administratorLogin": "[parameters('adminUsername')]",
+        "administratorLoginPassword": "[parameters('adminPassword')]"
+      }
+    },
+
+    {
+      "name": "[concat(variables('sqlServerName'), '/', variables('sqlDbName'))]",
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "[variables('apiVersionDw')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+      ],
+      "properties": {
+        "edition": "[variables('sqlEdition')]",
+        "collation": "[parameters('collation')]",
+        "maxSizeBytes": "[parameters('maxSizeBytes')]",
+        "requestedServiceObjectiveName": "[parameters('performanceDwu')]"
+      }
+    },
+
+    {
+      "name": "[concat(variables('sqlServerName'), '/', variables('sqlFwRuleName'))]",
+      "type": "Microsoft.Sql/servers/firewallRules",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+      ],
+      "properties": {
+        "startIpAddress": "0.0.0.0",
+        "endIpAddress": "0.0.0.0"
+      }
+    },
+
+    {
+      "name": "[concat(variables('sqlServerName'), '/', variables('sqlConnPolName'))]",
+      "type": "Microsoft.Sql/servers/connectionPolicies",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+      ],
+      "properties": {
+        "connectionType": "Proxy"
+      }
+    }
+
+  ],
+
+  "outputs": {
+  }
+
+}
