@@ -77,9 +77,9 @@
 
 # Set VM config to include new Availability Set
 
-    $asRef = New-Object Microsoft.Azure.Management.Compute.Models.SubResource
+    $asRef = New-Object Microsoft.Azure.Management.Compute.Models.AvailabilitySetReference
 
-    $asRef.Id = $as.Id
+    $asRef.ResourceUri = $as.Id
 
     $vm.AvailabilitySetReference = $asRef # To remove VM from Availability Set, set to $null
 
