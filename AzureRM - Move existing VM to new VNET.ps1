@@ -148,6 +148,7 @@
 
         $asName = $vm.AvailabilitySetReference.ReferenceUri.Split("/")[-1]
 
+        # Define new Availability Set name for VMs in new VNET - may wish to change naming convention used below to reflect your deployment
         $asNewName = "${asName}-${vnetName}"
 
         New-AzureRmAvailabilitySet `
