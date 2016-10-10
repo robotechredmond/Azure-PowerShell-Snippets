@@ -170,7 +170,7 @@
 
     }
 
-# Reconfigure VM
+# Re-provision VM with new configuration settings
 
     $yn = @("Yes","No") | 
         Out-GridView `
