@@ -13,20 +13,25 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-# KNOWN TECHNICAL LIMITATIONS:
+# TECHNICAL NOTES:
+#
 # - This script is intended to move an Azure VM with ONLY a single attached
 #   NIC to a new VNET
+#
 # - VMs attached to an Azure Load Balancer will need to be manually 
 #   re-attached to a new Azure Load Balancer resource after all VMs in the 
 #   Availability Set are moved.
+#
 # - This script snippet is provided as a sample demo, and as such, robust
 #   error handling that is common to a production script is not inclued.
+#
+# - This script snippet was tested using Azure PowerShell 2.x
 
-# Sign-in to Azure via Azure Resource Manager
+# STEP 1 - Sign-in with Azure account
 
     Login-AzureRmAccount
 
-# Select Azure Subscription
+# STEP 2 - Select Azure Subscription
 
     $subscriptionId = 
         ( Get-AzureRmSubscription |
@@ -38,7 +43,7 @@
     Select-AzureRmSubscription `
         -SubscriptionId $subscriptionId
 
-# If needed, register ARM core resource providers
+# STEP 3 - If needed, register ARM core resource providers
 
     Register-AzureRmResourceProvider `
         -ProviderNamespace Microsoft.Compute
@@ -54,7 +59,7 @@
         -Property ProviderNamespace `
         -ExpandProperty ResourceTypes
 
-# Select Azure Resource Group in which existing VNET is provisioned
+# STEP 4 - Select Azure Resource Group in which existing VNET is provisioned
 
     $rgName =
         ( Get-AzureRmResourceGroup |
@@ -63,7 +68,7 @@
               -PassThru
         ).ResourceGroupName
 
-# Select VM to re-provision
+# STEP 5 - Select VM to re-provision
 
     $vmName = 
         ( Get-AzureRmVm `
@@ -81,7 +86,7 @@
     $location = 
         $vm.Location
 
-# Select VNET to which VM should be moved
+# STEP 6 - Select VNET to which VM should be moved
 
     $vnetName = 
         ( Get-AzureRmVirtualNetwork `
@@ -96,7 +101,7 @@
             -ResourceGroupName $rgName `
             -Name $vnetName
 
-# Select Subnet to which VM should be moved
+# STEP 7 - Select Subnet to which VM should be moved
 
     $subnetName = 
         ( Get-AzureRmVirtualNetworkSubnetConfig `
@@ -111,7 +116,7 @@
           -VirtualNetwork $vnet `
           -Name $subnetName
 
-# Get VM NIC properties for primary NIC
+# STEP 8 - Get VM NIC properties for primary NIC
 
     $nicId = 
         $vm.NetworkInterfaceIDs[0]
@@ -124,7 +129,9 @@
             -ResourceGroupName $rgName `
             -Name $nicName
 
-# Detach VM NIC from Azure Load Balancer, if currently assigned
+# STEP 9 - Detach VM NIC from Azure Load Balancer, if currently assigned.
+#          After all VMs in Availability Set are moved, Azure Load Balancer
+#          will need to be reconfigured for moved VMs.
 
     if ( $nic.IpConfigurations[0].LoadBalancerBackendAddressPools ) {
 
@@ -137,18 +144,18 @@
 
     }
 
-# Set new properties for VM NIC
+# STEP 10 - Set new properties for VM NIC
 
     $nicIpConfigName = 
         $nic.IpConfigurations[0].Name
 
     $nicNew = 
-        Set-AzureRmNetworkInterfaceIpConfiguration `
+        Set-AzureRmNetworkInterfaceIpConfig `
             -NetworkInterface $nic `
             -Name $nicIpConfigName `
             -Subnet $subnet
 
-# Clean-up VM config to reflect deployment from attached disks
+# STEP 11 - Clean-up VM config to reflect deployment from attached disks
 
     $vm.StorageProfile.OSDisk.Name = $vmName
 
@@ -161,13 +168,13 @@
 
     $vm.OSProfile = $null
 
-# If VM is in an availability set, move to new availabity set
+# STEP 12 - If VM is in an availability set, move to new availabity set
 
     if ( $vm.AvailabilitySetReference ) {
 
-        $asName = $vm.AvailabilitySetReference.ReferenceUri.Split("/")[-1]
+        $asName = $vm.AvailabilitySetReference.Id.Split("/")[-1]
 
-        # Define new Availability Set name for VMs in new VNET - may wish to change naming convention used below to reflect your deployment
+        # Define new Availability Set name for VMs in new VNET
         $asNewName = "${asName}-${vnetName}"
 
         New-AzureRmAvailabilitySet `
@@ -181,40 +188,46 @@
                 -ResourceGroupName $rgName `
                 -Name $asNewName
 
-        $asRef = New-Object Microsoft.Azure.Management.Compute.Models.AvailabilitySetReference
+        $asRef = New-Object Microsoft.Azure.Management.Compute.Models.SubResource
 
-        $asRef.ReferenceUri = $as.id
+        $asRef.id = $as.id
 
         $vm.AvailabilitySetReference = $asRef
 
     }
 
-# Re-provision VM with new configuration settings
+# STEP 13 - Re-provision VM with new configuration settings
 
-    $yn = @("Yes","No") | 
-        Out-GridView `
-            -Title "OK to reconfigure existing VM ${vmName}?" `
-            -PassThru
+    If ( !$Error ) {
 
-    if ( $yn -eq "Yes" ) {
+        $yn = @("Yes","No") | 
+            Out-GridView `
+                -Title "OK to reconfigure existing VM ${vmName}?" `
+                -PassThru
 
-        # Stop and de-allocate existing VM
+        if ( $yn -eq "Yes" ) {
+
+            # Stop and de-allocate existing VM
         
-            Stop-AzureRmVM -ResourceGroupName $rgName -Name $vmName
+                Stop-AzureRmVM -ResourceGroupName $rgName -Name $vmName
 
-        # Remove existing VM, but preserve virtual hard disks
+            # Remove existing VM, but preserve virtual hard disks
 
-            Remove-AzureRmVM -ResourceGroupName $rgName -Name $vmName
+                Remove-AzureRmVM -ResourceGroupName $rgName -Name $vmName
 
-        # Reconfigure existing Network Interface for new Subnet
+            # Reconfigure existing Network Interface for new Subnet
 
-            Set-AzureRmNetworkInterface -NetworkInterface $nicNew
+                Set-AzureRmNetworkInterface -NetworkInterface $nicNew
 
-        # Re-provision VM from attached disks
+            # Re-provision VM from attached disks
 
-            $vm | 
-                New-AzureRmVm `
-                    -ResourceGroupName $rgName `
-                    -Location $location
+                $vm | 
+                    New-AzureRmVm `
+                        -ResourceGroupName $rgName `
+                        -Location $location
+
+        }
 
     }
+    
+
