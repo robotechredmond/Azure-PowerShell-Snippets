@@ -65,7 +65,7 @@ $storageAccountKey =
     ( Get-AzureRmStorageAccountKey `
           -Name $storageAccountName `
           -ResourceGroupName $rgName
-    ).Key1
+    )[0].Value
 
 # STEP 8: Sign-in to Azure via Azure Service Management
 
