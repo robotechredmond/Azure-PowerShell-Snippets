@@ -99,5 +99,5 @@
            @{n='summary';e={$_.properties.summary}},
            @{n='reason';e={$_.properties.reasonType}},
            @{n='occuredTime';e={$_.properties.occuredTime}},
-           @{n='reportedTime';e={$_.properties.reportedTime}}
+           @{n='reportedTime';e={$_.properties.reportedTime}} |
         Format-List
