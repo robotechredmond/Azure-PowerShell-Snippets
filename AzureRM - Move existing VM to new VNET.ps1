@@ -13,9 +13,14 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-# LIMITATIONS:
-# - This script is intended to move an Azure VM with ONLY a single attached NIC to a new VNET
-# - This script does not currently support moving VMs that are assigned to an Azure load balancer
+# KNOWN TECHNICAL LIMITATIONS:
+# - This script is intended to move an Azure VM with ONLY a single attached
+#   NIC to a new VNET
+# - VMs attached to an Azure Load Balancer will need to be manually 
+#   re-attached to a new Azure Load Balancer resource after all VMs in the 
+#   Availability Set are moved.
+# - This script snippet is provided as a sample demo, and as such, robust
+#   error handling that is common to a production script is not inclued.
 
 # Sign-in to Azure via Azure Resource Manager
 
@@ -106,8 +111,7 @@
           -VirtualNetwork $vnet `
           -Name $subnetName
 
-# Reconfigure NIC properties for new Subnet
-# Note that this script only works for VMs with a single NIC attached
+# Get VM NIC properties for primary NIC
 
     $nicId = 
         $vm.NetworkInterfaceIDs[0]
@@ -119,6 +123,21 @@
         Get-AzureRmNetworkInterface `
             -ResourceGroupName $rgName `
             -Name $nicName
+
+# Detach VM NIC from Azure Load Balancer, if currently assigned
+
+    if ( $nic.IpConfigurations[0].LoadBalancerBackendAddressPools ) {
+
+        $nic.IpConfigurations[0].LoadBalancerBackendAddressPools = $null
+    }
+
+    if ( $nic.IpConfigurations[0].LoadBalancerInboundNatRules ) {
+
+        $nic.IpConfigurations[0].LoadBalancerInboundNatRules = $null
+
+    }
+
+# Set new properties for VM NIC
 
     $nicIpConfigName = 
         $nic.IpConfigurations[0].Name
