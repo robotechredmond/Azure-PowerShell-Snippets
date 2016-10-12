@@ -32,6 +32,8 @@
 
 # STEP 1 - Sign-in with Azure account
 
+    $Error.Clear()
+    
     Login-AzureRmAccount
 
 # STEP 2 - Select Azure Subscription
