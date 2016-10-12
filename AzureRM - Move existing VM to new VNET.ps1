@@ -18,6 +18,9 @@
 # - This script is intended to move an Azure VM with ONLY a single attached
 #   NIC to a new VNET
 #
+# - This script expects that the existing VNET, new VNET and VM to be moved 
+#   are all located in the same Azure Resource Group
+#
 # - VMs attached to an Azure Load Balancer will need to be manually 
 #   re-attached to a new Azure Load Balancer resource after all VMs in the 
 #   Availability Set are moved.
