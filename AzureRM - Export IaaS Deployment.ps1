@@ -71,8 +71,8 @@
 
         $vmLocation = $_.Location
         $vmSize = $_.HardwareProfile.VmSize
-        $asName = ""
-        $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id).Name
+        $asName = $null
+        $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id -ErrorAction SilentlyContinue).Name
         $vmNic = Get-AzureRmResource -ResourceId $_.NetworkInterfaceIDs[0]
         $vmNicName = $vmNic.Name
         $vmNicIpCfg = (Get-AzureRmResource -ResourceId $vmNic.Properties.IpConfigurations[0].Id -ApiVersion '2016-09-01')
