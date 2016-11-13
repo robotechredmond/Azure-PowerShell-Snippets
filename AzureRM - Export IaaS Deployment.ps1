@@ -41,11 +41,15 @@
 
 # Enter filename for export
 
-    $exportFile = Read-Host -Prompt "Export Filename (default=.\export.csv): "
+    $reportDate = Get-Date -Format yyyyMMdd
+
+    $defaultExportFile = $filename = ".\export-${subscriptionId}-${reportDate}.csv"
+    
+    $exportFile = Read-Host -Prompt "Export Filename (default=${defaultExportFile})"
 
     if (!$exportFile) {
 
-        $exportFile = ".\export.csv"
+        $exportFile = $defaultExportFile
 
     }
 
@@ -66,8 +70,9 @@
         Write-Progress -Activity "Export VM configurations ..." -CurrentOperation "$vmName ..." -PercentComplete ($vmCurrent/$vmCount*100) -SecondsRemaining -1
 
         $vmLocation = $_.Location
-        $vmSize = $_.HardwareProfile.VirtualMachineSize
-        $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.ReferenceUri).Name
+        $vmSize = $_.HardwareProfile.VmSize
+        $asName = ""
+        $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id).Name
         $vmNic = Get-AzureRmResource -ResourceId $_.NetworkInterfaceIDs[0]
         $vmNicName = $vmNic.Name
         $vmNicIpCfg = (Get-AzureRmResource -ResourceId $vmNic.Properties.IpConfigurations[0].Id -ApiVersion '2016-09-01')
@@ -90,8 +95,8 @@
 
         $vmNicNsgName = (Get-AzureRmResource -ResourceId $vmNic.Properties.NetworkSecurityGroup.Id).Name
 
-        $vmStorageAccountName = $_.StorageProfile.OSDisk.VirtualHardDisk[0].Uri.Split('/.')[2]
-        $vmStorageAccountFqdn = $_.StorageProfile.OSDisk.VirtualHardDisk[0].Uri.Split('/')[2]
+        $vmStorageAccountName = $_.StorageProfile.OSDisk.Vhd.Uri.Split('/.')[2]
+        $vmStorageAccountFqdn = $_.StorageProfile.OSDisk.Vhd.Uri.Split('/')[2]
         $vmStorageAccountHost = (Resolve-DnsName $vmStorageAccountFqdn).NameHost.Split('.')[1]
 
         Write-Output "$rgName,$vmName,$vmLocation,$vmSize,$asName,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" -ErrorAction Stop >>$exportFile
