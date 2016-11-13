@@ -1,4 +1,8 @@
-﻿Login-AzureRmAccount
+﻿[System.Reflection.Assembly]::LoadWithPartialName("System.Web")
+
+# Sign-in to Azure
+
+Login-AzureRmAccount
 
 # Select an Azure Subscription for which to report usage data
 
@@ -12,9 +16,9 @@ Select-AzureRmSubscription -SubscriptionId $subscriptionId
 
 # Get amount of in-use storage across all storage accounts
 
-$reportedStartTime = "2016-08-25"
+$reportedStartTime = "2016-11-11"
 
-$reportedEndTime = "2016-08-26"
+$reportedEndTime = "2016-11-12"
 
 # Set path to exported CSV file
 
@@ -64,8 +68,7 @@ Do {
     if ($usageData.NextLink) {
 
         $continuationToken = `
-            [System.Web.HttpUtility]::`
-            UrlDecode($usageData.NextLink.Split("=")[-1])
+            [System.Web.HttpUtility]::UrlDecode($usageData.NextLink.Split("=")[-1])
 
         $usageData = Get-UsageAggregates `
             -ReportedStartTime $reportedStartTime `
