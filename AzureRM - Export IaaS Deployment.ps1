@@ -60,6 +60,7 @@
     [array]$vms = Get-AzureRMVM -ResourceGroupName $rgName -ErrorAction Stop
 
     $vmCount = $vms.Count
+
     $vmCurrent = 0
 
     $vms | % { 
@@ -70,19 +71,31 @@
         Write-Progress -Activity "Export VM configurations ..." -CurrentOperation "$vmName ..." -PercentComplete ($vmCurrent/$vmCount*100) -SecondsRemaining -1
 
         $vmLocation = $_.Location
+
         $vmSize = $_.HardwareProfile.VmSize
+
         $asName = $null
-        $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id -ErrorAction SilentlyContinue).Name
+
+        If ($_.AvailabilitySetReference.Id) {
+            $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id).Name
+        }
+
         $vmNic = Get-AzureRmResource -ResourceId $_.NetworkInterfaceIDs[0]
+
         $vmNicName = $vmNic.Name
+
         $vmNicIpCfg = (Get-AzureRmResource -ResourceId $vmNic.Properties.IpConfigurations[0].Id -ApiVersion '2016-09-01')
+
         $vmVnet = $vmNicIpCfg.Properties.Subnet.Id.Split('/')[8]
+
         $vmSubnet = $vmNicIpCfg.Properties.Subnet.Id.Split('/')[10]
     
         $vmNicPrivateIp = $vmNicIpCfg.Properties.PrivateIPAddress
+
         $vmNicPrivateIpAlloc = $vmNicIpCfg.Properties.PrivateIPAllocationMethod
 
         $vmNicPublicIp = $null
+
         $vmNicPublicIpAlloc = $null
     
         If ($vmNicIpCfg.Properties.PublicIpAddress) {
@@ -96,7 +109,9 @@
         $vmNicNsgName = (Get-AzureRmResource -ResourceId $vmNic.Properties.NetworkSecurityGroup.Id).Name
 
         $vmStorageAccountName = $_.StorageProfile.OSDisk.Vhd.Uri.Split('/.')[2]
+
         $vmStorageAccountFqdn = $_.StorageProfile.OSDisk.Vhd.Uri.Split('/')[2]
+
         $vmStorageAccountHost = (Resolve-DnsName $vmStorageAccountFqdn).NameHost.Split('.')[1]
 
         Write-Output "$rgName,$vmName,$vmLocation,$vmSize,$asName,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" -ErrorAction Stop >>$exportFile
