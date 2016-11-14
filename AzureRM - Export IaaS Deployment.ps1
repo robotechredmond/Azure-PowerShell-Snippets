@@ -55,7 +55,7 @@
 
 # Export VM deployment configuration
 
-    Write-Output "rgName,vmName,vmLocation,vmSize,asName,vmStorageAccountName,vmStorageAccountHost,vmVnet,vmSubnet,vmNicPrivateIp,vmNicPrivateIpAlloc,vmNicNsgName,vmNicPublicIp,vmNicPublicIpAlloc" >$exportFile
+    Write-Output "rgName,vmName,vmLocation,vmSize,asName,numDataDisks,vmStorageAccountName,vmStorageAccountHost,vmVnet,vmSubnet,vmNicPrivateIp,vmNicPrivateIpAlloc,vmNicNsgName,vmNicPublicIp,vmNicPublicIpAlloc" >$exportFile
 
     [array]$vms = Get-AzureRMVM -ResourceGroupName $rgName -ErrorAction Stop
 
@@ -79,6 +79,8 @@
         If ($_.AvailabilitySetReference.Id) {
             $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id).Name
         }
+
+        $numDataDisks = $_.DataDiskNames.Count
 
         $vmNic = Get-AzureRmResource -ResourceId $_.NetworkInterfaceIDs[0]
 
@@ -114,6 +116,6 @@
 
         $vmStorageAccountHost = (Resolve-DnsName $vmStorageAccountFqdn).NameHost.Split('.')[1]
 
-        Write-Output "$rgName,$vmName,$vmLocation,$vmSize,$asName,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" -ErrorAction Stop >>$exportFile
+        Write-Output "$rgName,$vmName,$vmLocation,$vmSize,$asName,$numDataDisks,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" -ErrorAction Stop >>$exportFile
     
     }
