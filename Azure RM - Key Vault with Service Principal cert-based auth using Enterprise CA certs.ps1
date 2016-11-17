@@ -8,6 +8,21 @@
                 -PassThru
         )
 
+# If not using Enterprise PKI, create self-signed certificate instead
+
+
+    if (!$cert) {
+
+        $cert = New-SelfSignedCertificate `
+            -CertStoreLocation Cert:\CurrentUser\My `
+            -Subject "CN=examplesp" `
+            -KeySpec KeyExchange `
+            -HashAlgorithm SHA256
+
+    }
+
+# Get certificate thumbprint
+
     $certThumbprint = $cert.Thumbprint
 
 # Get public key and properties from selected cert
@@ -16,9 +31,9 @@
 
     $keyId = [guid]::NewGuid()
 
-    $startDate = $cert.GetEffectiveDateString()
+    $startDate = $cert.NotBefore
 
-    $endDate = $cert.GetExpirationDateString()
+    $endDate = $cert.NotAfter
 
 # Create a Key Credential object for selected cert
 
@@ -70,7 +85,7 @@
             -DisplayName $adAppName `
             -HomePage $adAppHomePage `
             -IdentifierUris $adAppIdentifierUri `
-            -KeyCredentials $keyCredential
+            -KeyCredentials $keyCredential 
 
     Write-Output “New Azure AD App Id: $($adApp.ApplicationId)”
 
