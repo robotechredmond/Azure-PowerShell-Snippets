@@ -10,7 +10,6 @@
 
 # If not using Enterprise PKI, create self-signed certificate instead
 
-
     if (!$cert) {
 
         $cert = New-SelfSignedCertificate `
