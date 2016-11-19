@@ -63,7 +63,7 @@
             -ResourceGroupName $rgName `
             -Name $vmNicName
 
-    # Specify how many secondary private IP addresses to add to SQL VM NIC (Max = 255)
+    # Specify how many secondary private IP addresses to add to SQL VM NIC (Max = 250)
     # Need 1 secondary IP for WSFC cluster, and 1 secondary IP per SQL AG listener
 
     $secondaryIPTotal = 5
