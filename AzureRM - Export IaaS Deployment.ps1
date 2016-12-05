@@ -55,9 +55,9 @@
 
 # Export VM deployment configuration
 
-    Write-Output "rgName,vmName,vmLocation,vmSize,asName,numDataDisks,vmStorageAccountName,vmStorageAccountHost,vmVnet,vmSubnet,vmNicPrivateIp,vmNicPrivateIpAlloc,vmNicNsgName,vmNicPublicIp,vmNicPublicIpAlloc" >$exportFile
+    Write-Output "rgName,vmName,vmLocation,vmSize,asName,vmFd,vmUd,vmAgentVersion,numDataDisks,vmStorageAccountName,vmStorageAccountHost,vmVnet,vmSubnet,vmNicPrivateIp,vmNicPrivateIpAlloc,vmNicNsgName,vmNicPublicIp,vmNicPublicIpAlloc" >$exportFile
 
-    [array]$vms = Get-AzureRMVM -ResourceGroupName $rgName -ErrorAction Stop
+    [array]$vms = Get-AzureRmVM -ResourceGroupName $rgName -ErrorAction Stop
 
     $vmCount = $vms.Count
 
@@ -66,6 +66,9 @@
     $vms | % { 
 
         $vmCurrent++
+
+        $vmRgName = $_.ResourceGroupName
+
         $vmName = $_.Name
 
         Write-Progress -Activity "Export VM configurations ..." -CurrentOperation "$vmName ..." -PercentComplete ($vmCurrent/$vmCount*100) -SecondsRemaining -1
@@ -79,6 +82,14 @@
         If ($_.AvailabilitySetReference.Id) {
             $asName = (Get-AzureRmResource -ResourceId $_.AvailabilitySetReference.Id).Name
         }
+
+        $vmStatus = Get-AzureRmVM -ResourceGroupName $_.ResourceGroupName -Name $_.Name -Status
+
+        $vmFd = $vmStatus.PlatformFaultDomain
+
+        $vmUd = $vmStatus.PlatformUpdateDomain
+
+        $vmAgentVersion = $vmStatus.VMAgent.VmAgentVersion
 
         $numDataDisks = $_.DataDiskNames.Count
 
@@ -116,6 +127,6 @@
 
         $vmStorageAccountHost = (Resolve-DnsName $vmStorageAccountFqdn).NameHost.Split('.')[1]
 
-        Write-Output "$rgName,$vmName,$vmLocation,$vmSize,$asName,$numDataDisks,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" -ErrorAction Stop >>$exportFile
+        Write-Output "$vmRgName,$vmName,$vmLocation,$vmSize,$asName,$vmFd,$vmUd,$vmAgentVersion,$numDataDisks,$vmStorageAccountName,$vmStorageAccountHost,$vmVnet,$vmSubnet,$vmNicPrivateIp,$vmNicPrivateIpAlloc,$vmNicNsgName,$vmNicPublicIp,$vmNicPublicIpAlloc" -ErrorAction Stop >>$exportFile
     
     }
