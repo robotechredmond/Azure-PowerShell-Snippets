@@ -1,0 +1,149 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Naming prefix for each new resource created. 8-char max, lowercase alphanumeric"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Administrator of the Azure SQL Server instance"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Administrator account of the Azure SQL Server instance"
+            }
+        },
+        "collation": {
+            "type": "string",
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+            "metadata": {
+                "description": "Collation type for SQL database"
+            }
+        },
+        "maxSizeBytes": {
+            "type": "string",
+            "defaultValue": "10995116277760",
+            "metadata": {
+                "description": "Maximum database size in bytes"
+            }
+        },
+        "performanceDwu": {
+            "type": "string",
+            "defaultValue": "DW400",
+            "allowedValues": [
+                "DW100",
+                "DW200",
+                "DW300",
+                "DW400",
+                "DW500",
+                "DW600",
+                "DW1000",
+                "DW1200",
+                "DW1500",
+                "DW2000",
+                "DW3000",
+                "DW6000"
+            ],
+            "metadata": {
+                "description": "Performance tier of database in DWU"
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": "2014-04-01",
+        "apiVersionDw": "2014-04-01-preview",
+        "apiVersionStorage": "2016-01-01",
+        "sqlServerName": "[concat(parameters('namePrefix'),'srv')]",
+        "sqlDbName": "[concat(parameters('namePrefix'),'db')]",
+        "sqlFwRuleName": "AllowAllAzureIPs",
+        "sqlEdition": "DataWarehouse",
+        "sqlAuditPolicy": "Default",
+        "auditStorageName": "[concat(parameters('namePrefix'),'audit')]",
+        "auditStorageType": "Standard_GRS",
+        "auditEvents": "All",
+        "auditRetentionDays": "3285",
+        "auditLogsTableName": "[variables('sqlServerName')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('auditStorageName')]",
+            "apiVersion": "[variables('apiVersionStorage')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[variables('auditStorageType')]"
+            },
+            "kind": "Storage"
+        },
+        {
+            "name": "[variables('sqlServerName')]",
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('auditStorageName'))]"
+            ],
+            "properties": {
+                "version": "12.0",
+                "administratorLogin": "[parameters('adminUsername')]",
+                "administratorLoginPassword": "[parameters('adminPassword')]"
+            },
+            "resources": [
+                {
+                    "name": "[variables('sqlDbName')]",
+                    "type": "databases",
+                    "apiVersion": "[variables('apiVersionDw')]",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+                    ],
+                    "properties": {
+                        "edition": "[variables('sqlEdition')]",
+                        "collation": "[parameters('collation')]",
+                        "maxSizeBytes": "[parameters('maxSizeBytes')]",
+                        "requestedServiceObjectiveName": "[parameters('performanceDwu')]"
+                    }
+                },
+                {
+                    "name": "[variables('sqlAuditPolicy')]",
+                    "type": "auditingPolicies",
+                    "apiVersion": "[variables('apiVersion')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]",
+                        "[resourceId('Microsoft.Sql/servers/databases', variables('sqlServerName'), variables('sqlDbName'))]"
+                    ],
+                    "properties": {
+                        "auditingState": "Enabled",
+                        "eventTypesToAudit": "[variables('auditEvents')]",
+                        "storageAccountName": "[variables('auditStorageName')]",
+                        "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',variables('auditStorageName')),variables('apiVersionStorage')).keys[0].value]",
+                        "storageAccountResourceGroupName": "[resourceGroup().name]",
+                        "storageAccountSubscriptionId": "[subscription().subscriptionId]",
+                        "retentionDays": "[variables('auditRetentionDays')]",
+                        "auditLogsTableName": "[variables('auditLogsTableName')]"
+                    }
+                },
+                {
+                    "name": "[variables('sqlFwRuleName')]",
+                    "type": "firewallRules",
+                    "apiVersion": "[variables('apiVersion')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+                    ],
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "0.0.0.0"
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}
