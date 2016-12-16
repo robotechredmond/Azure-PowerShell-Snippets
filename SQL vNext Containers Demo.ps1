@@ -26,7 +26,7 @@ docker ps
 # Select a container
 $containerID=(docker ps -a|Out-GridView -PassThru).Substring(0,12)
 
-# Get container IP address
+# Get container IP address - connect to this address from within the local VM using SSMS
 docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $containerID
 
 # TSQL - create sample database
