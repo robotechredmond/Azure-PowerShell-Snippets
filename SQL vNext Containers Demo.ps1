@@ -62,9 +62,6 @@ docker images
 # Start new container from committed image
 docker run -d -p 14332:1433 -e sa_password=$saPassword -e ACCEPT_EULA=Y sampleimage01
 
-# Login to Docker Hub
-docker login 
-
 # Login to Azure Container Registry
 docker login $acrRegistry -u $acrUser -p $acrPassword
 
