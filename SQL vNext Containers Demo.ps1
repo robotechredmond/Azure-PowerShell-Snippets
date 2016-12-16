@@ -23,11 +23,10 @@ docker run -d -p 14331:1433 -e sa_password=$saPassword -e ACCEPT_EULA=Y microsof
 # Display running containers
 docker ps
 
-# Display all containers
-docker ps -a
+# Select a container
+$containerID=(docker ps -a|Out-GridView -PassThru).Substring(0,12)
 
 # Get container IP address
-$containerID="xxxx"
 docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $containerID
 
 # TSQL - create sample database
