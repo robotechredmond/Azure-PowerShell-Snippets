@@ -105,13 +105,6 @@
 
 # If a second VM needs to be moved to same availability set, then use below
 
-    $rgName =
-        ( Get-AzureRmResourceGroup |
-            Out-GridView `
-              -Title "Select existing Azure Resource Group for 2nd VM ..." `
-              -PassThru
-        ).ResourceGroupName
-
     $vmName = 
         ( Get-AzureRmVm `
             -ResourceGroupName $rgName 
