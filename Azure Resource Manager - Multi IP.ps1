@@ -175,23 +175,27 @@
     # Create an in-memory representation of the primary replica.
     # Note that "\Instance" is not required in -Name parameter if using DEFAULT instance
 
+    $primaryServer = Get-Item "SQLSERVER:\SQL\PrimaryServer\Instance22"
+
     $primaryReplica = New-SqlAvailabilityReplica `
         -Name "PrimaryComputer\Instance" `
         -EndpointURL "TCP://PrimaryComputer.domain.com:5022" `
         -AvailabilityMode "SynchronousCommit" `
         -FailoverMode "Automatic" `
-        -Version 12 `
+        -Version ($primaryServer.Version) `
         -AsTemplate
 
     # Create an in-memory representation of the secondary replica.
     # Note that "\Instance" is not required in -Name parameter if using DEFAULT instance
+
+    $secondaryServer = Get-Item "SQLSERVER:\SQL\SecondaryServer\Instance22"
 
     $secondaryReplica = New-SqlAvailabilityReplica `
         -Name "SecondaryComputer\Instance" `
         -EndpointURL "TCP://SecondaryComputer.domain.com:5022" `
         -AvailabilityMode "SynchronousCommit" `
         -FailoverMode "Automatic" `
-        -Version 12 `
+        -Version ($secondaryServer.Version) `
         -AsTemplate
 
     # Create the availability group
