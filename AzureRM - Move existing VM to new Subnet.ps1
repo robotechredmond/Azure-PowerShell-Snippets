@@ -148,4 +148,4 @@
         
     }
 
-    Start-AzureRmVM -Name $vmName -ResourceGroupName $rgName -Confirm:$true
+    Start-AzureRmVM -Name $vmName -ResourceGroupName $rgName
