@@ -1,26 +1,22 @@
 ﻿# Set date range for exported usage data
 
-$reportedStartTime = "2015-05-01"
+$reportedStartTime = "2017-03-07"
 
-$reportedEndTime = "2015-06-28"
+$reportedEndTime = "2017-03-08"
 
 # Authenticate to Azure
 
-Add-AzureAccount
-
-# Switch to Azure Resource Manager mode
-
-Switch-AzureMode -Name AzureResourceManager
+Login-AzureRmAccount
 
 # Select an Azure Subscription for which to report usage data
 
 $subscriptionId = 
-    (Get-AzureSubscription |
+    (Get-AzureRmSubscription |
      Out-GridView `
         -Title "Select an Azure Subscription ..." `
         -PassThru).SubscriptionId
 
-Select-AzureSubscription -SubscriptionId $subscriptionId
+Select-AzureRmSubscription -SubscriptionId $subscriptionId
 
 # Set path to exported CSV file
 
@@ -38,14 +34,13 @@ $appendFile = $false
 
 $continuationToken = ""
 
-Do { 
+$usageData = Get-UsageAggregates `
+    -ReportedStartTime $reportedStartTime `
+    -ReportedEndTime $reportedEndTime `
+    -AggregationGranularity $granularity `
+    -ShowDetails:$showDetails 
 
-    $usageData = Get-UsageAggregates `
-        -ReportedStartTime $reportedStartTime `
-        -ReportedEndTime $reportedEndTime `
-        -AggregationGranularity $granularity `
-        -ShowDetails:$showDetails `
-        -ContinuationToken $continuationToken
+Do { 
 
     $usageData.UsageAggregations.Properties | 
         Select-Object `
@@ -66,11 +61,16 @@ Do {
             -NoTypeInformation:$true `
             -Path $filename
 
-    if ($usageData.NextLink) {
+    if ($usageData.ContinuationToken) {
 
-        $continuationToken = `
-            [System.Web.HttpUtility]::`
-            UrlDecode($usageData.NextLink.Split("=")[-1])
+        $continuationToken = $usageData.ContinuationToken
+
+        $usageData = Get-UsageAggregates `
+            -ReportedStartTime $reportedStartTime `
+            -ReportedEndTime $reportedEndTime `
+            -AggregationGranularity $granularity `
+            -ShowDetails:$showDetails `
+            -ContinuationToken $continuationToken
 
     } else {
 
