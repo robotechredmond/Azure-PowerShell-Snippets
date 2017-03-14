@@ -105,4 +105,4 @@
 
     $vnetName = "classic-vnet-name"
 
-    New-AzureDedicatedCircuitLink -ServiceKey $cky.ServiceKey -VNetName $vnetName
+    New-AzureDedicatedCircuitLink -ServiceKey $ckt.ServiceKey -VNetName $vnetName
