@@ -4,7 +4,7 @@
 
 # Sign-in to ARM with Azure account credentials
 
-    Login-AzureRmAccount
+    Login-AzureRmAccount 
 
 # Select Azure Subscription
 
@@ -80,6 +80,10 @@
 <#
  # Link ExpressRoute Circuit to Classic VNET in different subscription
 #>
+
+# Import ExpressRoute PowerShell Module for Classic operations
+
+    Import-Module "C:\Program Files (x86)\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\ExpressRoute\ExpressRoute.psd1"
 
 # Sign-in to ASM as Authorized User
 
