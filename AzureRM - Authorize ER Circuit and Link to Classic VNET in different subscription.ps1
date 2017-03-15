@@ -2,9 +2,18 @@
  # Enable existing ARM-provisoned ExpressRoute circuit for Classic operations
 #>
 
+# Select Azure Cloud Environment
+
+    $azureEnv = 
+        (Get-AzureEnvironment).Name |
+        Out-GridView `
+            -Title "Select Azure Environment ..." `
+            -PassThru
+
 # Sign-in to ARM with Azure account credentials
 
-    Login-AzureRmAccount 
+    Login-AzureRmAccount `
+        -EnvironmentName $azureEnv
 
 # Select Azure Subscription
 
@@ -55,7 +64,8 @@
 
 # Sign-in to ASM with Azure AD credentials
 
-    Add-AzureAccount
+    Add-AzureAccount `
+        -Environment $azureEnv
 
 # Select same Azure subscription for use with ASM
 
@@ -85,9 +95,18 @@
 
     Import-Module "C:\Program Files (x86)\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\ExpressRoute\ExpressRoute.psd1"
 
+# Select Azure Cloud Environment
+
+    $azureEnv = 
+        (Get-AzureEnvironment).Name |
+        Out-GridView `
+            -Title "Select Azure Environment ..." `
+            -PassThru
+
 # Sign-in to ASM as Authorized User
 
-    Add-AzureAccount
+    Add-AzureAccount `
+        -Environment $azureEnv
 
 # Select Azure Subscription to connect to shared ExpressRoute circuit
 
@@ -98,11 +117,11 @@
             -PassThru).SubscriptionId
 
     Select-AzureSubscription `
-        -SubscriptionId $subscriptionId
+        -SubscriptionId $authSubscriptionId
 
-# Confirm ExpressRoute circuit link authorization
+# Get circuit properties for authorized ExpressRoute circuit
 
-    Get-AzureDedicatedCircuitLinkAuthorization -ServiceKey $ckt.ServiceKey
+    $ckt = Get-AzureAuthorizedDedicatedCircuit
 
 # Connect authorized ExpressRoute circuit to Classic VNET with GatewaySubnet and VNET Gateway already provisioned
 # See this link for steps to provision GatewaySubnet and VNET Gateway: https://docs.microsoft.com/en-us/azure/expressroute/expressroute-howto-vnet-portal-classic
