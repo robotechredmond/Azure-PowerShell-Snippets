@@ -60,12 +60,17 @@
 
 # Convert OS disk to default to Premium storage
 
-    $osDisk = $image.StorageProfile.OsDisk
-    $osDisk.StorageAccountType = "PremiumLRS"
+    $osDisk = 
+        $image.StorageProfile.OsDisk
+
+    $osDisk.StorageAccountType = 
+        "PremiumLRS"
 
 # Convert Data disks to default to Premium Storage
 
-    $dataDisks = $image.StorageProfile.DataDisks
+    $dataDisks = 
+        $image.StorageProfile.DataDisks
+
     for ($i = 0; $i -lt $dataDisks.Count; $i++)
     { 
         $dataDisks[0].StorageAccountType = "PremiumLRS" 
@@ -73,13 +78,26 @@
 
 # Enter new name for converted image
 
-    $newImageName = Read-Host -Prompt "Enter new name for converted VM image [Enter = ${imageName}-ssd]"
-    if ($newImageName -eq "") { $newImageName = "${imageName}-ssd" }
+    $newImageName = 
+        Read-Host `
+            -Prompt "Enter new name for converted VM image [Enter = ${imageName}-ssd]"
+
+    if ($newImageName -eq "") 
+    {
+        $newImageName = "${imageName}-ssd" 
+    }
 
 # Define new config for converted image
 
-    $newImageConfig = New-AzureRmImageConfig -Location $location -OsDisk $osDisk -DataDisk $dataDisks
+    $newImageConfig = 
+        New-AzureRmImageConfig `
+            -Location $location `
+            -OsDisk $osDisk `
+            -DataDisk $dataDisks
 
 # Create new image based on converted image config 
 
-    New-AzureRmImage -ResourceGroupName $rgName -ImageName $newImageName -Image $newImageConfig
+    New-AzureRmImage `
+        -ResourceGroupName $rgName `
+        -ImageName $newImageName `
+        -Image $newImageConfig
