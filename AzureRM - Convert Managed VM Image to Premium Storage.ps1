@@ -73,7 +73,7 @@
 
     for ($i = 0; $i -lt $dataDisks.Count; $i++)
     { 
-        $dataDisks[0].StorageAccountType = "PremiumLRS" 
+        $dataDisks[$i].StorageAccountType = "PremiumLRS" 
     }
 
 # Enter new name for converted image
