@@ -28,6 +28,11 @@
     $Error.Clear()
 
     Login-AzureRmAccount
+    # Add TenantId if you need to log in to a specific tenant by commenting out following two lines
+    # and using this Login-AzureRmAccount instead of previous login command.
+    # You will also need to uncomment TenantId in line 47 to include TenantId in Select-AzureRmSubscription.
+    # $tenantId = ##Specific Tenant Id##
+    # Login-AzureRmAccount -TenantId $tenantId
 
 # STEP 2 - Select Azure Subscription
 
@@ -39,7 +44,7 @@
         ).SubscriptionId
 
     Select-AzureRmSubscription `
-        -SubscriptionId $subscriptionId
+        -SubscriptionId $subscriptionId #-TenantId $tenantId
 
 # STEP 3 - If needed, register ARM core resource providers
 
@@ -87,7 +92,7 @@
 # STEP 6 - Select new subnet to which VM should be moved
 
     $nicId = 
-        $vm.NetworkInterfaceIDs[0]
+        $vm.NeworkProfile.NetworkInterfaces[0].Id
 
     $nicName = 
         (Get-AzureRmResource -ResourceId $nicId).Name
