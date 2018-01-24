@@ -22,7 +22,7 @@ Configuration AppInsightsConfig
 
         Package AppInsights_Installation
         {
-            Ensure = "Absent"
+            Ensure = "Present"
             Name = "Application Insights Status Monitor"
             Path = "${env:ProgramFiles}\Microsoft\Web Platform Installer\WebPiCmd-x64.exe"
             ProductId = ""
