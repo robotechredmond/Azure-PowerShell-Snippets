@@ -14,7 +14,7 @@ Configuration AppInsightsConfig
         {
             Ensure = "Present"
             Name = "Microsoft Web Platform Installer 5.0"
-            Path = "${env:TEMP}\wpilauncher.exe"
+            Path = "${env:TEMP}\webpilauncher.exe"
             ProductId = "4D84C195-86F0-4B34-8FDE-4A17EB41306A"
             Arguments = ""
             DependsOn = @("[Script]WebPi_Download")
