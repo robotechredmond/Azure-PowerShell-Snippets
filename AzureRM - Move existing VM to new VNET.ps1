@@ -130,7 +130,7 @@
 # STEP 9 - Get VM NIC properties for primary NIC
 
     $nicId = 
-        $vm.NetworkInterfaceIDs[0]
+        $vm.NetworkProfile.NetworkInterfaces[0].Id
 
     $nicName = 
         $nicId.Split("/")[-1]
