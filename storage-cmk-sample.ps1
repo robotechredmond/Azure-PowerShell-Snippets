@@ -72,12 +72,18 @@
 
     $keyDestination = "Software" # "Software" or "HSM"
 
+    $Expires = (Get-Date).AddYears(2).ToUniversalTime()
+
+    $NotBefore = (Get-Date).ToUniversalTime()
+
     $key = Add-AzureKeyVaultKey `
         -VaultName $kv.VaultName `
         -Name $keyName `
-        -Destination $keyDestination
+        -Destination $keyDestination `
+        -Expires $Expires `
+        -NotBefore $NotBefore
 
-# Assign access to key for Storage Account
+# Assign access to Key Vault for Storage Account
 
     Set-AzureRmKeyVaultAccessPolicy `
         -VaultName $kv.VaultName `
