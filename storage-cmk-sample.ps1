@@ -15,7 +15,7 @@
 
 # Create new Resource Group
 
-    $location = "westcentralus"
+    $location = "canadacentral"
 
     $rgName = "enter-resource-group-name"
 
@@ -98,5 +98,6 @@
         -KeyvaultEncryption `
         -KeyName $key.Name `
         -KeyVersion $key.Version `
-        -KeyVaultUri $kv.VaultUri 
+        -KeyVaultUri $kv.VaultUri `
+        -Debug
 

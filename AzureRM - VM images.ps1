@@ -1,4 +1,6 @@
-﻿$location = "South Central US"
+﻿Login-AzureRmAccount
+
+$location = "South Central US"
 
 Get-AzureRmVMImagePublisher -Location $location
 
