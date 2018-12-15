@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-# PowerShell Snippet for calling Azure Resource Manager REST API to enumerate all VMs in a subscription
+# PowerShell Snippet for calling Azure Resource Manager REST API to enumerate Rate Card meters
 
 # Authenticate to Azure - can automate with Azure AD Service Principal credentials
 
