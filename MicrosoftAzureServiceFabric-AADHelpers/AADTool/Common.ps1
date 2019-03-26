@@ -27,8 +27,11 @@ function GetRESTHeaders()
     $redirectUrl = "urn:ietf:wg:oauth:2.0:oob"
     
     $authenticationContext = New-Object Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext -ArgumentList $authString, $FALSE
+    
+    $PromptBehavior = [Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior]::RefreshSession
+    $PlatformParameters = New-Object Microsoft.IdentityModel.Clients.ActiveDirectory.PlatformParameters -ArgumentList $PromptBehavior
+    $accessToken = $authenticationContext.AcquireTokenAsync($resourceUrl, $clientId, $redirectUrl, $PlatformParameters).Result.AccessToken
 
-    $accessToken = $authenticationContext.AcquireToken($resourceUrl, $clientId, $redirectUrl, [Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior]::RefreshSession).AccessToken
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $headers.Add("Authorization", $accessToken)
     return $headers
