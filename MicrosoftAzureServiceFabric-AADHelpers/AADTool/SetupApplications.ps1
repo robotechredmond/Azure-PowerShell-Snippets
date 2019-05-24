@@ -165,28 +165,31 @@ Else
     }
 }
 
-switch ($Location)
-{
-    "china"
-    {
-        $oauth2Permissions = @(@{
-            adminConsentDescription = "Allow the application to access " + $WebApplicationName + " on behalf of the signed-in user."
-            adminConsentDisplayName = "Access " + $WebApplicationName
-            id = [guid]::NewGuid()
-            isEnabled = $true
-            type = "User"
-            userConsentDescription = "Allow the application to access " + $WebApplicationName + " on your behalf."
-            userConsentDisplayName = "Access " + $WebApplicationName
-            value = "user_impersonation"
-        })
-        $webApp.oauth2Permissions = $oauth2Permissions
-    }
-}
-
 $webApp = CallGraphAPI $uri $headers $webApp
 AssertNotNull $webApp 'Web Application Creation Failed'
 $ConfigObj.WebAppId = $webApp.appId
 Write-Host 'Web Application Created:' $webApp.appId
+
+# Check for an existing delegated permission with value "user_impersonation". Normally this is created by default,
+# but if it isn't, we need to update the Application object with a new one.
+$user_impersonation_scope = $webApp.oauth2Permissions | Where-Object { $_.value -eq "user_impersonation" }
+if (-not $user_impersonation_scope) {
+    $patchApplicationUri = $graphAPIFormat -f ("applications/{0}" -f $webApp.objectId)
+    $webApp.oauth2Permissions = @($webApp.oauth2Permissions)
+    $webApp.oauth2Permissions += @{
+        "id" = [guid]::NewGuid()
+        "isEnabled" = $true
+        "type" = "User"
+        "adminConsentDescription" = ("Allow the application to access {0} on behalf of the signed-in user." -f $WebApplicationName)
+        "adminConsentDisplayName" = ("Access {0}" -f $WebApplicationName)
+        "userConsentDescription" = ("Allow the application to access {0} on your behalf." -f $WebApplicationName)
+        "userConsentDisplayName" = ("Access {0}"-f $WebApplicationName)
+        "value" = "user_impersonation"
+    }
+    CallGraphAPI -uri $patchApplicationUri -method "Patch" -headers $headers -body @{ 
+        "oauth2Permissions" = $webApp.oauth2Permissions
+    }
+}
 
 #Service Principal
 $uri = [string]::Format($graphAPIFormat, "servicePrincipals")

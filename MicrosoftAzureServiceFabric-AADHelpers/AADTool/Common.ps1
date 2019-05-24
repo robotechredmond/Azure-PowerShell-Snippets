@@ -37,10 +37,10 @@ function GetRESTHeaders()
     return $headers
 }
 
-function CallGraphAPI($uri, $headers, $body)
+function CallGraphAPI($uri, $headers, $body, $method = "Post")
 {
     $json = $body | ConvertTo-Json -Depth 4 -Compress
-    return (Invoke-RestMethod $uri -Method Post -Headers $headers -Body $json -ContentType "application/json")
+    return (Invoke-RestMethod $uri -Method $method -Headers $headers -Body $json -ContentType "application/json")
 }
 
 function AssertNotNull($obj, $msg){
