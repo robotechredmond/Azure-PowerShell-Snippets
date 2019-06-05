@@ -73,7 +73,7 @@
 
     Write-Output "Current SQL Connection Policy Type = ${sqlCurrentConnectionPolicyType}"
 
-    $sqlNewConnectionPolicyType = "Proxy" # Valid values are "Default", "Proxy" and "Redirect"
+    $sqlNewConnectionPolicyType  = ("Default", "Proxy" , "Redirect") | Out-GridView -Title "Select Mode to set" -PassThru
 
     Write-Output "New SQL Connection Policy Type = ${sqlNewConnectionPolicyType}"
 
