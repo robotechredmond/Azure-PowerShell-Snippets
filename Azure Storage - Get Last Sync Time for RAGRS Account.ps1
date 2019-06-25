@@ -17,23 +17,23 @@
 
 # Authenticate to Azure - can automate with Azure AD Service Principal credentials
 
-    Login-AzureRmAccount
+Login-AzAccount
 
 # Select Azure Subscription - can automate with specific Azure subscriptionId
 
     $subscriptionId = 
-        (Get-AzureRmSubscription |
+        (Get-AzSubscription |
          Out-GridView `
             -Title "Select an Azure Subscription ..." `
             -PassThru).SubscriptionId
 
-    Select-AzureRmSubscription `
+    Select-AzSubscription `
         -SubscriptionId $subscriptionId
 
 # Select Azure Resource Group
 
     $rgName =
-        (Get-AzureRmResourceGroup |
+        (Get-AzResourceGroup |
          Out-GridView `
             -Title "Select an Azure Resource Group ..." `
             -PassThru).ResourceGroupName
@@ -41,7 +41,7 @@
 # Select Azure RA-GRS Storage Account
 
     $saName =
-        (Get-AzureRmStorageAccount `
+        (Get-AzStorageAccount `
             -ResourceGroupName $rgName |
         Where-Object SecondaryEndpoints -ne $null |
         Out-GridView `
@@ -51,12 +51,16 @@
 # Get Secondary Endpoint for Blob Service on RA-GRS Storage Account
 
     $saEndpoint =
-        (Get-AzureRmStorageAccount -ResourceGroupName $rgName -Name $saName).SecondaryEndpoints.Blob
+        (Get-AzStorageAccount `
+            -ResourceGroupName $rgName `
+            -Name $saName).SecondaryEndpoints.Blob
 
 # Get Primary Access Key for RA-GRS Storage account
 
     $saKey = 
-        (Get-AzureRmStorageAccountKey -ResourceGroupName $rgName -Name $saName).Value[0]
+        (Get-AzStorageAccountKey `
+            -ResourceGroupName $rgName `
+            -Name $saName).Value[0]
 
 # Set REST API parameters
 
@@ -69,17 +73,29 @@
     $contentType="application/xml"
 
     $action = "GET"
-
     $newLine = "`n";
-    $message = $action + $newLine + $newLine + $contentType+ $newLine + $newLine + "x-ms-date:" + $requestDate + $newLine + "x-ms-version:" + $apiVersion + $newLine + "/" + $saName + "/?comp=stats"
+    $message = 
+        $action + 
+        $newLine + 
+        $newLine + 
+        $contentType + 
+        $newLine + 
+        $newLine + 
+        "x-ms-date:" + $requestDate + 
+        $newLine + 
+        "x-ms-version:" + $apiVersion + 
+        $newLine + 
+        "/" + 
+        $saName + 
+        "/?comp=stats"
 
     $hmacsha = New-Object System.Security.Cryptography.HMACSHA256
     $hmacsha.key = [Convert]::FromBase64String($saKey)
+
     $signature = $hmacsha.ComputeHash([Text.Encoding]::UTF8.GetBytes($message))
     $signature = [Convert]::ToBase64String($signature)
 
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-
     $headers.Add("x-ms-date", $requestDate)
     $headers.Add("x-ms-version", "$apiVersion")
     $headers.Add("Authorization", "SharedKeyLite " + $saName + ":" + $signature)
