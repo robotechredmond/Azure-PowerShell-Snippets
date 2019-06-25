@@ -17,7 +17,7 @@
 
 # Authenticate to Azure - can automate with Azure AD Service Principal credentials
 
-Login-AzAccount
+    Login-AzAccount
 
 # Select Azure Subscription - can automate with specific Azure subscriptionId
 
