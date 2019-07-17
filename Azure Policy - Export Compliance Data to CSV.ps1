@@ -19,12 +19,12 @@
 
     Login-AzAccount 
 
-# Select Azure subscriptions to include in compliance scope
+# Select Azure subscriptions to include in compliance reporting scope
 
     $subscriptionIds = 
         (Get-AzSubscription |
          Out-GridView `
-            -Title "Select Azure subscriptions to include in compliance scope ..." `
+            -Title "Select Azure subscriptions to include in compliance reporting scope ..." `
             -PassThru).SubscriptionId
 
 # Enter filename for export
