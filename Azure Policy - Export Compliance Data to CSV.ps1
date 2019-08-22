@@ -17,7 +17,7 @@
 
 # Authenticate to Azure - can automate with Azure AD Service Principal credentials
 
-    Login-AzAccount 
+    Connect-AzAccount 
 
 # Select Azure subscriptions to include in compliance reporting scope
 
