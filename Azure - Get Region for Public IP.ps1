@@ -1,4 +1,23 @@
-﻿function Convert-IPv4ToInt ($IPv4Address)
+﻿#-------------------------------------------------------------------------
+# Copyright (c) Microsoft.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#--------------------------------------------------------------------------
+
+# PowerShell Snippet for finding Azure Region in which a Public IP is provisioned
+
+# Helper functions
+
+function Convert-IPv4ToInt ($IPv4Address)
 {
 
   try
@@ -89,6 +108,10 @@ function Get-AzRegionForPublicIp ( $IpAddress, $Region = "EastUS" )
 
 # Main entry point
 
-Connect-AzAccount
+# Authenticate to Azure
 
-Get-AzRegionForPublicIp -IpAddress "13.78.132.23" 
+    Connect-AzAccount
+
+# Get Region for Public IP Address
+
+    Get-AzRegionForPublicIp -IpAddress "13.78.132.23" 
