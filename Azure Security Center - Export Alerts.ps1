@@ -41,15 +41,15 @@
 
     $subscriptionIds | % {
 
-    Select-AzSubscription -Subscription $_ 
-    Get-AzSecurityAlert | 
-    Select-Object `
-        -Property SubscriptionId, `
-                  AlertName, `
-                  AlertDisplayName, `
-                  ReportedSeverity, `
-                  @{n='ResourceType';e={$_.ExtendedProperties.resourceType}} | 
-    ConvertTo-Csv -NoTypeInformation | 
-    Out-File -Append -FilePath $exportFile
+        Select-AzSubscription -Subscription $_ 
+        Get-AzSecurityAlert | 
+        Select-Object `
+            -Property SubscriptionId, `
+                      AlertName, `
+                      AlertDisplayName, `
+                      ReportedSeverity, `
+                      @{n='ResourceType';e={$_.ExtendedProperties.resourceType}} | 
+        ConvertTo-Csv -NoTypeInformation | 
+        Out-File -Append -FilePath $exportFile
 
     }
