@@ -49,8 +49,8 @@
 # Set other REST API parameters
 
     $apiVersion = 
-        ((Get-AzResourceProvider -ProviderNamespace Microsoft.Insights).ResourceTypes | 
-        Where-Object ResourceTypeName -eq "diagnosticSettings").ApiVersions[0]
+        ((Get-AzResourceProvider -ProviderNamespace Microsoft.Insights).ResourceTypes |
+            Where-Object ResourceTypeName -eq "diagnosticSettings").ApiVersions[0]
     $action = "GET"
     $contentType = "application/json"
     $uriPrefix = "https://management.azure.com"
