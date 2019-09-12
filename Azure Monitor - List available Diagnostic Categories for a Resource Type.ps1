@@ -27,14 +27,10 @@
             -Title "Select an Azure Subscription ..." `
             -PassThru).SubscriptionId
 
-# Select Azure Resource for which to determine available Log Categories
+# Select Azure Resource Type for which to determine available Log Categories
 
-    $resourceId = 
-        (Get-AzResource | 
-         Sort-Object -Property ResourceType, ResourceName |
-         Out-GridView `
-            -Title "Select an Azure Resource ..." `
-            -PassThru).ResourceId
+    $resourceTypes = 
+        Get-AzResource | Sort-Object -Property ResourceType -Unique
 
 # Get token and create authorization header
 
@@ -55,16 +51,49 @@
     $contentType = "application/json"
     $uriPrefix = "https://management.azure.com"
     $uriSuffix = "/providers/microsoft.insights/diagnosticSettingsCategories?api-version=${apiVersion}"
-    $uri = $uriPrefix + $resourceId + $uriSuffix
 
-# Determine available Diagnostic Settings categories for the selected resource
 
-    $results = 
-        Invoke-RestMethod `
-            -ContentType $contentType `
-            -Uri $uri `
-            -Method $action `
-            -Headers $authHeader
+# Determine available Diagnostic Settings categories for the selected resource type
 
-    $results.value | 
-        Select-Object name, properties
+    $resourceTypes | ForEach-Object {
+
+        $uri = $uriPrefix + $_.ResourceId + $uriSuffix
+
+        $resourceType = $_.ResourceType
+
+        $results = $null
+
+        try {
+
+            $results = 
+                Invoke-RestMethod `
+                    -ContentType $contentType `
+                    -Uri $uri `
+                    -Method $action `
+                    -Headers $authHeader 
+
+        } catch { 
+
+            if ( 
+            
+                ($error[0].ErrorDetails.Message | ConvertFrom-Json).Code `
+                -notin 
+                @("InvalidResourceType","ResourceNotSupported") 
+
+            ) 
+            {
+                
+                Write-Error $error[0].ErrorDetails.Message
+
+            }
+
+        }
+
+        $results.value | 
+            Select-Object `
+                @{n='resourceType';e={$resourceType}},
+                name, 
+                properties | 
+            Format-Table
+
+    }
