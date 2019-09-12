@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-# PowerShell Snippet for calling Azure Monitor REST API to list diagnostic settings categories for a resource type
+# PowerShell Snippet for calling Azure Monitor REST API to list diagnostic settings categories for resource types provisioned in a subscription
 
 # Authenticate to Azure - can automate with Azure AD Service Principal credentials
 
@@ -27,7 +27,7 @@
             -Title "Select an Azure Subscription ..." `
             -PassThru).SubscriptionId
 
-# Select Azure Resource Type for which to determine available Log Categories
+# Select Azure resource types for which to determine available Log Categories
 
     $resourceTypes = 
         Get-AzResource | Sort-Object -Property ResourceType -Unique
@@ -51,7 +51,6 @@
     $contentType = "application/json"
     $uriPrefix = "https://management.azure.com"
     $uriSuffix = "/providers/microsoft.insights/diagnosticSettingsCategories?api-version=${apiVersion}"
-
 
 # Determine available Diagnostic Settings categories for the selected resource type
 
