@@ -71,7 +71,7 @@
                     -Method $action `
                     -Headers $authHeader 
 
-        } catch { 
+        } catch [System.Net.WebException] { 
 
             if ( 
             
