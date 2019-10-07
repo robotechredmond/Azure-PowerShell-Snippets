@@ -90,14 +90,14 @@
             $results.value |
                 Where-Object name -Like "*/logDefinitions/*" |
                 Select-Object `
-                    @{n='resourceType';e={%{ ($_.name.split("/") | ? {$_ -notIn @("providers", "Microsoft.Insights", "logDefinitions", "read") }) -join "/" }}},
+                    @{n='resourceType';e={%{ (($_.name.replace("/Microsoft.Insights",$null)).split("/") | ? {$_ -notIn @("providers", "logDefinitions", "read") }) -join "/" }}},
                     @{n='categoryType';e={"log"}},
                     @{n='categoryNames';e={$_.properties.serviceSpecification.logSpecifications.name}} 
 
             $results.value |
                 Where-Object name -Like "*/metricDefinitions/*" |
                 Select-Object `
-                    @{n='resourceType';e={%{ ($_.name.split("/") | ? {$_ -notIn @("providers", "Microsoft.Insights", "metricDefinitions", "read") }) -join "/" }}},
+                    @{n='resourceType';e={%{ (($_.name.replace("/Microsoft.Insights",$null)).split("/") | ? {$_ -notIn @("providers", "metricDefinitions", "read") }) -join "/" }}},
                     @{n='categoryType';e={"metric"}},
                     @{n='categoryNames';e={$_.properties.serviceSpecification.metricSpecifications.name}} 
         }
