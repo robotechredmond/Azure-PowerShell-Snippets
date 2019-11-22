@@ -1,23 +1,23 @@
 ﻿# Sign-in with Azure account credentials
 
-    Login-AzureRmAccount
+Connect-AZAccount
 
 # Select Azure Subscription
 
     $subscriptionId = 
-        (Get-AzureRmSubscription |
+        (Get-AZSubscription |
          Out-GridView `
             -Title "Select an Azure Subscription ..." `
             -PassThru).SubscriptionId
 
 
-    Select-AzureRmSubscription `
+    Select-AZSubscription `
         -SubscriptionId $subscriptionId
 
 # Select Azure Resource Group 
 
     $rgName =
-        (Get-AzureRmResourceGroup |
+        (Get-AZResourceGroup |
          Out-GridView `
             -Title "Select an Azure Resource Group ..." `
             -PassThru).ResourceGroupName
@@ -60,7 +60,7 @@
         $ruleName = "Allow_Azure_Out_" + $subnet.Replace("/","-")
     
         $rules += 
-            New-AzureRmNetworkSecurityRuleConfig `
+            New-AZNetworkSecurityRuleConfig `
                 -Name $ruleName `
                 -Description "Allow outbound to Azure $subnet" `
                 -Access Allow `
@@ -77,7 +77,7 @@
     }
 
     $rules += 
-        New-AzureRmNetworkSecurityRuleConfig `
+        New-AZNetworkSecurityRuleConfig `
             -Name "Deny_Internet_Out" `
             -Description "Deny outbound to Internet" `
             -Access Deny `
@@ -98,7 +98,7 @@
     $nsgname = "Allow_Azure_Out"
 
     $nsg = 
-        New-AzureRmNetworkSecurityGroup `
+        New-AZNetworkSecurityGroup `
             -Name "$nsgName" `
             -ResourceGroupName $rgName `
             -Location $location `
@@ -109,13 +109,13 @@
     # Select VNET
 
         $vnetName = 
-            (Get-AzureRmVirtualNetwork `
+            (Get-AZVirtualNetwork `
                 -ResourceGroupName $rgName).Name |
              Out-GridView `
                 -Title "Select an Azure VNET ..." `
                 -PassThru
 
-        $vnet = Get-AzureRmVirtualNetwork `
+        $vnet = Get-AZVirtualNetwork `
             -ResourceGroupName $rgName `
             -Name $vnetName
 
@@ -132,9 +132,9 @@
 
     # Associate NSG to selected Subnet
 
-        Set-AzureRmVirtualNetworkSubnetConfig `
+        Set-AZVirtualNetworkSubnetConfig `
             -VirtualNetwork $vnet `
             -Name $subnetName `
             -AddressPrefix $subnet.AddressPrefix `
             -NetworkSecurityGroup $nsg |
-        Set-AzureRmVirtualNetwork
+        Set-AZVirtualNetwork
