@@ -25,5 +25,5 @@ Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 
 # Install Az PowerShell Modules
-Install-Module -Name Az -MinimumVersion 2.0.0 -Scope AllUsers -Repository PSGallery
-Install-Module -Name AzTable -MinimumVersion 2.0.0 -Scope AllUsers -Repository PSGallery
+Install-Module -Name Az -MinimumVersion 2.0.0 -Scope AllUsers -Repository PSGallery -Force
+Install-Module -Name AzTable -MinimumVersion 2.0.0 -Scope AllUsers -Repository PSGallery -Force
